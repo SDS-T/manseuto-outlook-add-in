@@ -4,27 +4,15 @@
  * Event: OnMessageRecipientsChanged
  * Trigger: marketing@mansueto.com is present in the To field
  *
- * The event handler is intentionally contained in one JavaScript file with
- * no imports so it can run in Outlook's event-based activation runtime.
+ * Kept to ECMAScript 2016-compatible syntax for older classic Outlook builds.
  */
 
 /* global Office */
 
 var TARGET_EMAIL = "marketing@mansueto.com";
 
-Office.initialize = function () {};
-
 function onMessageRecipientsChangedHandler(event) {
   var item = Office.context.mailbox.item;
-
-  if (
-    event &&
-    event.changedRecipientFields &&
-    event.changedRecipientFields.to === false
-  ) {
-    event.completed();
-    return;
-  }
 
   if (!item || !item.to) {
     event.completed();
@@ -40,9 +28,11 @@ function onMessageRecipientsChangedHandler(event) {
 
     var recipients = recipientResult.value || [];
     var foundTarget = false;
+    var i;
+    var address;
 
-    for (var i = 0; i < recipients.length; i++) {
-      var address = recipients[i] && recipients[i].emailAddress;
+    for (i = 0; i < recipients.length; i += 1) {
+      address = recipients[i] && recipients[i].emailAddress;
 
       if (
         address &&
@@ -95,10 +85,11 @@ function checkForExistingTemplate(event) {
 
 function insertIntakeTemplate(event, bodyType) {
   var item = Office.context.mailbox.item;
-  var template =
-    bodyType === Office.CoercionType.Html
-      ? getHtmlTemplate()
-      : getTextTemplate();
+  var template = getTextTemplate();
+
+  if (bodyType === Office.CoercionType.Html) {
+    template = getHtmlTemplate();
+  }
 
   item.body.prependAsync(
     template,
@@ -135,17 +126,17 @@ function getHtmlTemplate() {
 
 function getTextTemplate() {
   return (
-    "RFP INTAKE\n\n" +
-    "RFP (Y/N):\n\n" +
-    "Account:\n\n" +
-    "Deliverable Needed (formats):\n\n" +
-    "Brand being activated (Inc. / FC / Both):\n\n" +
-    "Due Date:\n\n" +
-    "Goals & Objectives:\n\n" +
-    "Budget:\n\n" +
-    "General ideas or thoughts on tactics that are appropriate:\n\n" +
-    "Splits should be included:\n\n" +
-    "Your planner in RFP requests:\n\n"
+    "RFP INTAKE\\n\\n" +
+    "RFP (Y/N):\\n\\n" +
+    "Account:\\n\\n" +
+    "Deliverable Needed (formats):\\n\\n" +
+    "Brand being activated (Inc. / FC / Both):\\n\\n" +
+    "Due Date:\\n\\n" +
+    "Goals & Objectives:\\n\\n" +
+    "Budget:\\n\\n" +
+    "General ideas or thoughts on tactics that are appropriate:\\n\\n" +
+    "Splits should be included:\\n\\n" +
+    "Your planner in RFP requests:\\n\\n"
   );
 }
 
